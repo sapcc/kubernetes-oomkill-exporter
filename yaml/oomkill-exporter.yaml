@@ -1,11 +1,10 @@
-apiVersion: apps/v1beta2
-kind: Deployment
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   name: oomkill-exporter
   labels:
     app: oomkill-exporter
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: oomkill-exporter

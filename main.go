@@ -116,8 +116,8 @@ func getContainerFromPod(podUID string, cli *docker_client.Client) (docker_types
 		return docker_types.Container{}, err
 	}
 
-	if len(containers) != 1 {
-		return docker_types.Container{}, fmt.Errorf("There should be only on container with UID %s", podUID)
+	if len(containers) < 1 {
+		return docker_types.Container{}, fmt.Errorf("There should be at least one container with UID %s", podUID)
 	}
 
 	return containers[0], nil
