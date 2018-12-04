@@ -26,10 +26,11 @@ const (
 
 var (
 	kubernetesCounterVec      *prometheus.CounterVec
-	prometheusContainerLabels = []string{
-		"io.kubernetes.container.name",
-		"io.kubernetes.pod.namespace",
-		"io.kubernetes.pod.uid",
+	prometheusContainerLabels = map[string]string{
+		"io.kubernetes.container.name": "kubernetes_container_name",
+		"io.kubernetes.pod.namespace":  "kubernetes_namespace",
+		"io.kubernetes.pod.uid":        "kubernetes_pod_uid",
+		"io.kubernetes.pod.name":       "kubernetes_pod_name",
 	}
 	metricsAddr string
 )
@@ -127,13 +128,14 @@ func prometheusCount(container docker_types.Container) {
 	var counter prometheus.Counter
 	var err error
 
-	var labels []string
-	for _, label := range prometheusContainerLabels {
-		labels = append(labels, container.Labels[label])
+	var labels map[string]string
+	labels = make(map[string]string)
+	for key, label := range prometheusContainerLabels {
+		labels[label] = container.Labels[key]
 	}
 
 	glog.V(5).Infof("Labels: %v\n", labels)
-	counter, err = kubernetesCounterVec.GetMetricWithLabelValues(labels...)
+	counter, err = kubernetesCounterVec.GetMetricWith(labels)
 
 	if err != nil {
 		glog.Warning(err)
