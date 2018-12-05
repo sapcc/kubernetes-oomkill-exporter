@@ -27,10 +27,10 @@ const (
 var (
 	kubernetesCounterVec      *prometheus.CounterVec
 	prometheusContainerLabels = map[string]string{
-		"io.kubernetes.container.name": "kubernetes_container_name",
-		"io.kubernetes.pod.namespace":  "kubernetes_namespace",
-		"io.kubernetes.pod.uid":        "kubernetes_pod_uid",
-		"io.kubernetes.pod.name":       "kubernetes_pod_name",
+		"io.kubernetes.container.name": "container_name",
+		"io.kubernetes.pod.namespace":  "namespace",
+		"io.kubernetes.pod.uid":        "pod_uid",
+		"io.kubernetes.pod.name":       "pod_name",
 	}
 	metricsAddr string
 )
