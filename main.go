@@ -37,8 +37,9 @@ var (
 )
 
 func init() {
+	var err error
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
-	dockerClient, err := docker_client.NewEnvClient()
+	dockerClient, err = docker_client.NewEnvClient()
 	if err != nil {
 		glog.Fatal(err)
 	}
