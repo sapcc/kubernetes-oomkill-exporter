@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	docker_types "github.com/docker/docker/api/types"
-	docker_filters "github.com/docker/docker/api/types/filters"
-	docker_client "github.com/docker/docker/client"
+	docker_client "docker.io/go-docker"
+	docker_types "docker.io/go-docker/api/types"
+	docker_filters "docker.io/go-docker/api/types/filters"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -32,11 +32,17 @@ var (
 		"io.kubernetes.pod.uid":        "pod_uid",
 		"io.kubernetes.pod.name":       "pod_name",
 	}
-	metricsAddr string
+	metricsAddr  string
+	dockerClient *docker_client.Client
 )
 
 func init() {
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
+	dockerClient, err := docker_client.NewEnvClient()
+	if err != nil {
+		glog.Fatal(err)
+	}
+	dockerClient.NegotiateAPIVersion(context.Background())
 }
 
 func main() {
@@ -69,18 +75,13 @@ func main() {
 	for log := range logCh {
 		podUID := getPodUIDFromLog(log.Message)
 		if podUID != "" {
-			cli, err := docker_client.NewEnvClient()
-			if err != nil {
-				glog.Fatal(err)
-			}
-
-			container, err := getContainerFromPod(podUID, cli)
+			container, err := getContainerFromPod(podUID, dockerClient)
 
 			if err != nil {
 				glog.Warningf("Could not get container for pod UID %s: %v", podUID, err)
+			} else {
+				prometheusCount(container)
 			}
-
-			prometheusCount(container)
 		}
 	}
 }
