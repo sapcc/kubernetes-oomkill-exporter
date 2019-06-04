@@ -1,7 +1,6 @@
 sudo: required
-language: go
 services:
   - docker
 install: true
 
-script: make container test vet
+script: make container

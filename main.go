@@ -2,14 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
 
 	docker_client "docker.io/go-docker"
 	docker_types "docker.io/go-docker/api/types"
-	docker_filters "docker.io/go-docker/api/types/filters"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -18,10 +16,8 @@ import (
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/types"
 )
 
-const (
-	OOMMatchExpression   = ".*killed as a result of limit of.*"
-	PodExtractExpression = "^.+/pod(\\w+\\-\\w+\\-\\w+\\-\\w+\\-\\w+)/.+$"
-	PodUIDLabel          = "io.kubernetes.pod.uid"
+var (
+	kmesgRE = regexp.MustCompile("/pod(\\w+\\-\\w+\\-\\w+\\-\\w+\\-\\w+)/([a-f0-9]+) killed as a result of limit of /kubepods")
 )
 
 var (
@@ -74,66 +70,43 @@ func main() {
 	}
 
 	for log := range logCh {
-		podUID := getPodUIDFromLog(log.Message)
-		if podUID != "" {
-			container, err := getContainerFromPod(podUID, dockerClient)
-
+		podUID, containerID := getContainerIDFromLog(log.Message)
+		if containerID != "" {
+			container, err := getContainer(containerID, dockerClient)
 			if err != nil {
-				glog.Warningf("Could not get container for pod UID %s: %v", podUID, err)
+				glog.Warningf("Could not get container %s for pod %s: %v", containerID, podUID, err)
 			} else {
-				prometheusCount(container)
+				prometheusCount(container.Config.Labels)
 			}
 		}
 	}
 }
 
-func getPodUIDFromLog(log string) string {
-	match, err := regexp.MatchString(OOMMatchExpression, log)
-	if err != nil {
-		return ""
+func getContainerIDFromLog(log string) (string, string) {
+	if matches := kmesgRE.FindStringSubmatch(log); matches != nil {
+		return matches[1], matches[2]
 	}
 
-	var ret []string
-	if match {
-		re := regexp.MustCompile(PodExtractExpression)
-		ret = re.FindStringSubmatch(log)
-		if len(ret) == 2 {
-			return ret[1]
-		}
-	}
-
-	return ""
+	return "", ""
 }
 
-func getContainerFromPod(podUID string, cli *docker_client.Client) (docker_types.Container, error) {
-	filters := docker_filters.NewArgs()
-	filters.Add("label", fmt.Sprintf("%s=%s", PodUIDLabel, podUID))
-	filters.Add("label", fmt.Sprintf("%s=%s", "io.kubernetes.docker.type", "container"))
-
-	listOpts := docker_types.ContainerListOptions{
-		Filters: filters,
-	}
-
-	containers, err := cli.ContainerList(context.Background(), listOpts)
+func getContainer(containerID string, cli *docker_client.Client) (docker_types.ContainerJSON, error) {
+	container, err := cli.ContainerInspect(context.Background(), containerID)
 	if err != nil {
-		return docker_types.Container{}, err
+		return docker_types.ContainerJSON{}, err
 	}
+	return container, nil
 
-	if len(containers) < 1 {
-		return docker_types.Container{}, fmt.Errorf("There should be at least one container with UID %s", podUID)
-	}
-
-	return containers[0], nil
 }
 
-func prometheusCount(container docker_types.Container) {
+func prometheusCount(containerLabels map[string]string) {
 	var counter prometheus.Counter
 	var err error
 
 	var labels map[string]string
 	labels = make(map[string]string)
 	for key, label := range prometheusContainerLabels {
-		labels[label] = container.Labels[key]
+		labels[label] = containerLabels[key]
 	}
 
 	glog.V(5).Infof("Labels: %v\n", labels)
