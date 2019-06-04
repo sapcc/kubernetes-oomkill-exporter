@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	kmesgRE = regexp.MustCompile("/pod(\\w+\\-\\w+\\-\\w+\\-\\w+\\-\\w+)/([a-f0-9]+) killed as a result of limit of /kubepods")
+	kmesgRE = regexp.MustCompile(`/pod(\w+-\w+-\w+-\w+-\w+)/([a-f0-9]+) killed as a result of limit of /kubepods`)
 )
 
 var (

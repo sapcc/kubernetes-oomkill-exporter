@@ -1,4 +1,4 @@
-FROM golang:1.11
+FROM golang:1.11 AS builder
 
 WORKDIR /go/src/github.com/sapcc/kuberntes-oomkill-exporter
 ENV GO111MODULE=on \
@@ -16,7 +16,7 @@ FROM alpine:3.8
 LABEL maintainer="jan.knipper@sap.com"
 
 RUN apk --no-cache add ca-certificates
-COPY --from=0 /kubernetes-oomkill-exporter /kubernetes-oomkill-exporter
+COPY --from=builder /kubernetes-oomkill-exporter /kubernetes-oomkill-exporter
 
 ENTRYPOINT ["/kubernetes-oomkill-exporter"]
 CMD ["-logtostderr"]
