@@ -1,6 +1,0 @@
-sudo: required
-services:
-  - docker
-install: true
-
-script: make container

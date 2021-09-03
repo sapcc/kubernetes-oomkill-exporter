@@ -1,7 +1,6 @@
 # kubernetes-oomkill-exporter
 
-[![Build Status](https://travis-ci.org/sapcc/kubernetes-oomkill-exporter.svg?branch=master)](https://travis-ci.org/sapcc/kubernetes-oomkill-exporter)
-[![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://travis-ci.org/sapcc/kubernetes-oomkill-exporter.svg?branch=master)
+[![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/sapcc/kubernetes-oomkill-exporter)
 [![License](https://img.shields.io/badge/license-Apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ----
