@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
       - name: oomkill-exporter
-        image: sapcc/kubernetes-oomkill-exporter:latest
-        imagePullPolicy: Always
+        image: sapcc/kubernetes-oomkill-exporter:0.3.1
+        imagePullPolicy: IfNotPresent
         args:
         - -logtostderr
         - -v=5
@@ -44,6 +44,8 @@ spec:
         ports:
         - name: metrics
           containerPort: 9102
+      tolerations:
+      - operator: Exists
       volumes:
       - name: kmsg
         hostPath:
@@ -51,3 +53,4 @@ spec:
       - name: docker
         hostPath:
           path: /var/run/docker.sock
+
