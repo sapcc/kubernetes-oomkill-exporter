@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	kmesgREStr = `/pod(\w+-\w+-\w+-\w+-\w+)/([a-f0-9]+) killed as a result of limit of /kubepods`
-	kmesgRE    *regexp.Regexp
+	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?([a-f0-9]+)`
+	kmesgRE        = regexp.MustCompile(defaultPattern)
 )
 
 var (
@@ -35,8 +35,15 @@ var (
 
 func init() {
 	var err error
+	var newPattern string
+
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
-	flag.StringVar(&kmesgREStr, "regexp-pattern", kmesgREStr, "The regexp pattern matching and extracting Pod UID and Container ID.")
+	flag.StringVar(&newPattern, "regexp-pattern", defaultPattern, "Overwrites the default regexp pattern to match and extract Pod UID and Container ID.")
+
+	if newPattern != "" {
+		kmesgRE = regexp.MustCompile(newPattern)
+	}
+
 	dockerClient, err = docker_client.NewEnvClient()
 	if err != nil {
 		glog.Fatal(err)
@@ -46,7 +53,6 @@ func init() {
 
 func main() {
 	flag.Parse()
-	kmesgRE = regexp.MustCompile(kmesgREStr)
 
 	var labels []string
 	for _, label := range prometheusContainerLabels {
