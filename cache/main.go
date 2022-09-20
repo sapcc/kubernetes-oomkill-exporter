@@ -6,12 +6,13 @@ package main
 
 import (
 	_ "flag"
+	_ "fmt"
 	_ "net/http"
 	_ "regexp"
 	_ "strings"
 
-	_ "docker.io/go-docker"
-	_ "docker.io/go-docker/api/types"
+	_ "github.com/containerd/containerd"
+	_ "github.com/containerd/containerd/namespaces"
 	_ "github.com/golang/glog"
 	_ "github.com/prometheus/client_golang/prometheus"
 	_ "github.com/prometheus/client_golang/prometheus/promhttp"

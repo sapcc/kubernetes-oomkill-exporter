@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	docker_client "docker.io/go-docker"
-	docker_types "docker.io/go-docker/api/types"
+	"github.com/containerd/containerd"
+	"github.com/containerd/containerd/namespaces"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?([a-f0-9]+)`
+	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:cri-containerd-)?([a-f0-9]+)`
 	kmesgRE        = regexp.MustCompile(defaultPattern)
 )
 
@@ -29,12 +29,10 @@ var (
 		"io.kubernetes.pod.uid":        "pod_uid",
 		"io.kubernetes.pod.name":       "pod_name",
 	}
-	metricsAddr  string
-	dockerClient *docker_client.Client
+	metricsAddr string
 )
 
 func init() {
-	var err error
 	var newPattern string
 
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
@@ -43,16 +41,16 @@ func init() {
 	if newPattern != "" {
 		kmesgRE = regexp.MustCompile(newPattern)
 	}
-
-	dockerClient, err = docker_client.NewEnvClient()
-	if err != nil {
-		glog.Fatal(err)
-	}
-	dockerClient.NegotiateAPIVersion(context.Background())
 }
 
 func main() {
 	flag.Parse()
+
+	containerdClient, err := containerd.New("/run/containerd/containerd.sock")
+	if err != nil {
+		glog.Fatal(err)
+	}
+	defer containerdClient.Close()
 
 	var labels []string
 	for _, label := range prometheusContainerLabels {
@@ -81,11 +79,11 @@ func main() {
 	for log := range logCh {
 		podUID, containerID := getContainerIDFromLog(log.Message)
 		if containerID != "" {
-			container, err := getContainer(containerID, dockerClient)
-			if err != nil {
-				glog.Warningf("Could not get container %s for pod %s: %v", containerID, podUID, err)
+			labels, err := getContainerLabels(containerID, containerdClient)
+			if err != nil || labels == nil {
+				glog.Warningf("Could not get labels for container id %s, pod %s: %v", containerID, podUID, err)
 			} else {
-				prometheusCount(container.Config.Labels)
+				prometheusCount(labels)
 			}
 		}
 	}
@@ -99,13 +97,14 @@ func getContainerIDFromLog(log string) (string, string) {
 	return "", ""
 }
 
-func getContainer(containerID string, cli *docker_client.Client) (docker_types.ContainerJSON, error) {
-	container, err := cli.ContainerInspect(context.Background(), containerID)
+func getContainerLabels(containerID string, cli *containerd.Client) (map[string]string, error) {
+	ctx := namespaces.WithNamespace(context.Background(), "k8s.io")
+	container, err := cli.ContainerService().Get(ctx, containerID)
 	if err != nil {
-		return docker_types.ContainerJSON{}, err
+		return nil, err
 	}
-	return container, nil
 
+	return container.Labels, nil
 }
 
 func prometheusCount(containerLabels map[string]string) {
