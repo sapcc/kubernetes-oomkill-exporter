@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
 
-	docker_client "docker.io/go-docker"
-	docker_types "docker.io/go-docker/api/types"
+	"github.com/containerd/containerd"
+	"github.com/containerd/containerd/namespaces"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -29,8 +30,8 @@ var (
 		"io.kubernetes.pod.uid":        "pod_uid",
 		"io.kubernetes.pod.name":       "pod_name",
 	}
-	metricsAddr  string
-	dockerClient *docker_client.Client
+	metricsAddr      string
+	containerdClient *containerd.Client
 )
 
 func init() {
@@ -44,15 +45,15 @@ func init() {
 		kmesgRE = regexp.MustCompile(newPattern)
 	}
 
-	dockerClient, err = docker_client.NewEnvClient()
+	containerdClient, err = containerd.New("/run/containerd/containerd.sock")
 	if err != nil {
 		glog.Fatal(err)
 	}
-	dockerClient.NegotiateAPIVersion(context.Background())
 }
 
 func main() {
 	flag.Parse()
+	defer containerdClient.Close()
 
 	var labels []string
 	for _, label := range prometheusContainerLabels {
@@ -81,11 +82,11 @@ func main() {
 	for log := range logCh {
 		podUID, containerID := getContainerIDFromLog(log.Message)
 		if containerID != "" {
-			container, err := getContainer(containerID, dockerClient)
-			if err != nil {
-				glog.Warningf("Could not get container %s for pod %s: %v", containerID, podUID, err)
+			labels, err := getContainerLabels(containerID, containerdClient)
+			if err != nil || labels == nil {
+				glog.Warningf("Could not get labels for container id %s, pod %s: %v", containerID, podUID, err)
 			} else {
-				prometheusCount(container.Config.Labels)
+				prometheusCount(labels)
 			}
 		}
 	}
@@ -99,13 +100,23 @@ func getContainerIDFromLog(log string) (string, string) {
 	return "", ""
 }
 
-func getContainer(containerID string, cli *docker_client.Client) (docker_types.ContainerJSON, error) {
-	container, err := cli.ContainerInspect(context.Background(), containerID)
+func getContainerLabels(containerID string, cli *containerd.Client) (map[string]string, error) {
+	ctx := namespaces.WithNamespace(context.Background(), "oomkill-exporter")
+	container, err := cli.Containers(ctx, fmt.Sprintf("%s==%s", "id", containerID))
 	if err != nil {
-		return docker_types.ContainerJSON{}, err
+		return nil, err
 	}
-	return container, nil
 
+	if len(container) > 0 {
+		labels, err := container[0].Labels(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return labels, nil
+	}
+
+	return nil, nil
 }
 
 func prometheusCount(containerLabels map[string]string) {
