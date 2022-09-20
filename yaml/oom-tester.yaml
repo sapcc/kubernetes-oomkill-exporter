@@ -1,0 +1,38 @@
+# from https://www.ackee.agency/blog/how-to-monitor-oom-kills-on-gke
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oom-tester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oom-tester
+  template:
+    metadata:
+      labels:
+        app: oom-tester
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - <insert node name>
+      containers:
+       - name: oom-test
+         image: ubuntu
+         command:
+          - "perl"
+          - "-wE"
+          - "my @xs; for (1..2**20) { push @xs, q{a} x 2**20 }; say scalar @xs;"
+         resources:
+           requests:
+             memory: "128Mi"
+             cpu: "250m"
+           limits:
+             memory: "128Mi"
+             cpu: "500m"

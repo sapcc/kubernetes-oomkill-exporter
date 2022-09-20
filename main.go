@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -18,7 +17,7 @@ import (
 )
 
 var (
-	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?([a-f0-9]+)`
+	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:cri-containerd-)?([a-f0-9]+)`
 	kmesgRE        = regexp.MustCompile(defaultPattern)
 )
 
@@ -30,12 +29,10 @@ var (
 		"io.kubernetes.pod.uid":        "pod_uid",
 		"io.kubernetes.pod.name":       "pod_name",
 	}
-	metricsAddr      string
-	containerdClient *containerd.Client
+	metricsAddr string
 )
 
 func init() {
-	var err error
 	var newPattern string
 
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
@@ -44,15 +41,15 @@ func init() {
 	if newPattern != "" {
 		kmesgRE = regexp.MustCompile(newPattern)
 	}
-
-	containerdClient, err = containerd.New("/run/containerd/containerd.sock")
-	if err != nil {
-		glog.Fatal(err)
-	}
 }
 
 func main() {
 	flag.Parse()
+
+	containerdClient, err := containerd.New("/run/containerd/containerd.sock")
+	if err != nil {
+		glog.Fatal(err)
+	}
 	defer containerdClient.Close()
 
 	var labels []string
@@ -101,22 +98,13 @@ func getContainerIDFromLog(log string) (string, string) {
 }
 
 func getContainerLabels(containerID string, cli *containerd.Client) (map[string]string, error) {
-	ctx := namespaces.WithNamespace(context.Background(), "oomkill-exporter")
-	container, err := cli.Containers(ctx, fmt.Sprintf("%s==%s", "id", containerID))
+	ctx := namespaces.WithNamespace(context.Background(), "k8s.io")
+	container, err := cli.ContainerService().Get(ctx, containerID)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(container) > 0 {
-		labels, err := container[0].Labels(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		return labels, nil
-	}
-
-	return nil, nil
+	return container.Labels, nil
 }
 
 func prometheusCount(containerLabels map[string]string) {
