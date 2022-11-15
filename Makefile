@@ -1,7 +1,7 @@
 TARGET = kubernetes-oomkill-exporter
 GOTARGET = github.com/sapcc/$(TARGET)
 REGISTRY ?= sapcc
-VERSION ?= 0.5.0
+VERSION ?= 0.5.1
 IMAGE = $(REGISTRY)/$(BIN)
 DOCKER ?= docker
 
