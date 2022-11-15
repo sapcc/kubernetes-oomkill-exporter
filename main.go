@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?([a-f0-9]+)`
+	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/(?:.+\/)?(?:kubepods-burstable-)?(?:kubepods-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?(?:cri-containerd-)?([a-f0-9]+)`
 	kmesgRE        = regexp.MustCompile(defaultPattern)
 )
 
@@ -30,19 +30,15 @@ var (
 		"io.kubernetes.pod.name":       "pod_name",
 	}
 	metricsAddr  string
+	newPattern   string
 	dockerClient *docker_client.Client
 )
 
 func init() {
 	var err error
-	var newPattern string
 
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
 	flag.StringVar(&newPattern, "regexp-pattern", defaultPattern, "Overwrites the default regexp pattern to match and extract Pod UID and Container ID.")
-
-	if newPattern != "" {
-		kmesgRE = regexp.MustCompile(newPattern)
-	}
 
 	dockerClient, err = docker_client.NewEnvClient()
 	if err != nil {
@@ -53,6 +49,11 @@ func init() {
 
 func main() {
 	flag.Parse()
+
+	if newPattern != "" {
+		glog.Infof("Using custom pattern: %s", newPattern)
+		kmesgRE = regexp.MustCompile(newPattern)
+	}
 
 	var labels []string
 	for _, label := range prometheusContainerLabels {
