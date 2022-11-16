@@ -1,0 +1,27 @@
+annotations: {}
+
+# valid value is containerd or docker
+containerRuntime: docker
+# containerRuntime: containerd
+
+nodeAffinity: {}
+
+imagePullPolicy: Always
+args:
+  - -logtostderr
+  - -v=5
+  - -regexp-pattern
+  - ^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/(?:.+\/)?(?:kubepods-burstable-)?(?:kubepods-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:docker-)?(?:cri-containerd-)?([a-f0-9]+)
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 20m
+    memory: 20Mi
+securityContext:
+  privileged: true
+
+PodMonitor:
+  enable: false
+  labels: {}

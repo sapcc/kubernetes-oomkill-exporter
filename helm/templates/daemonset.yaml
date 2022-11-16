@@ -1,0 +1,62 @@
+{{ $resourceName := print "oomkill-exporter-" .Values.containerRuntime }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{$resourceName}}
+  labels:
+    app: {{$resourceName}}
+spec:
+  selector:
+    matchLabels:
+      app: {{$resourceName}}
+  template:
+    metadata:
+      labels:
+        app: {{$resourceName}}
+      annotations: {{ toYaml .Values.annotations | nindent 8}}
+    spec:
+      affinity:
+        nodeAffinity: {{ toYaml .Values.nodeAffinity | nindent 10}}
+      containers:
+      - name: {{$resourceName}}
+        {{- if eq .Values.containerRuntime "containerd" }}
+        image: public.ecr.aws/shopline/kubernetes-oomkill-exporter:0.5.1
+        {{- else }}
+        image: public.ecr.aws/shopline/kubernetes-oomkill-exporter:0.4.1
+        env:
+        - name: DOCKER_HOST
+          value: "unix:///var/run/docker.sock"
+        {{- end }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        args: {{ toYaml .Values.args | nindent 8}}
+        securityContext: {{ toYaml .Values.securityContext | nindent 10}}
+        resources: {{ toYaml .Values.resources | nindent 10}}
+        volumeMounts:
+        - name: kmsg
+          mountPath: /dev/kmsg
+          readOnly: true
+        {{- if eq .Values.containerRuntime "containerd" }}
+        - name: containerd
+          mountPath: /run/containerd/containerd.sock
+        {{- else }}
+        - name: docker
+          mountPath: /var/run/docker.sock 
+        {{- end }}
+        ports:
+        - name: metrics
+          containerPort: 9102
+      tolerations:
+      - operator: Exists
+      volumes:
+      - name: kmsg
+        hostPath:
+          path: /dev/kmsg
+      {{- if eq .Values.containerRuntime "containerd" }}
+      - name: containerd
+        hostPath:
+          path: /run/containerd/containerd.sock
+      {{- else }}
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+      {{- end }}
