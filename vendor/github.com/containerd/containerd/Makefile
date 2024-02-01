@@ -223,6 +223,21 @@ cri-integration: binaries bin/cri-integration.test ## run cri integration tests
 	@bash -x ./script/test/cri-integration.sh
 	@rm -rf bin/cri-integration.test
 
+# build runc shimv2 with failpoint control, only used by integration test
+bin/containerd-shim-runc-fp-v1: integration/failpoint/cmd/containerd-shim-runc-fp-v1 FORCE
+	@echo "$(WHALE) $@"
+	@CGO_ENABLED=${SHIM_CGO_ENABLED} $(GO) build ${GO_BUILD_FLAGS} -o $@ ${SHIM_GO_LDFLAGS} ${GO_TAGS} ./integration/failpoint/cmd/containerd-shim-runc-fp-v1
+
+# build CNI bridge plugin wrapper with failpoint support, only used by integration test
+bin/cni-bridge-fp: integration/failpoint/cmd/cni-bridge-fp FORCE
+	@echo "$(WHALE) $@"
+	@$(GO) build ${GO_BUILD_FLAGS} -o $@ ./integration/failpoint/cmd/cni-bridge-fp
+
+# build runc-fp as runc wrapper to support failpoint, only used by integration test
+bin/runc-fp: integration/failpoint/cmd/runc-fp FORCE
+	@echo "$(WHALE) $@"
+	@$(GO) build ${GO_BUILD_FLAGS} -o $@ ./integration/failpoint/cmd/runc-fp
+
 benchmark: ## run benchmarks tests
 	@echo "$(WHALE) $@"
 	@$(GO) test ${TESTFLAGS} -bench . -run Benchmark -test.root
@@ -322,22 +337,26 @@ install-cri-deps: $(BINARIES)
 	@$(INSTALL) $(BINARIES) $(CRIDIR)/bin
 endif
 
+$(CRIDIR)/cri-containerd.DEPRECATED.txt:
+	@mkdir -p $(CRIDIR)
+	@$(INSTALL) -m 644 releases/cri-containerd.DEPRECATED.txt $@
+
 ifeq ($(GOOS),windows)
-releases/$(CRIRELEASE).tar.gz: install-cri-deps
+releases/$(CRIRELEASE).tar.gz: install-cri-deps $(CRIDIR)/cri-containerd.DEPRECATED.txt
 	@echo "$(WHALE) $@"
 	@cd $(CRIDIR) && tar -czf ../../releases/$(CRIRELEASE).tar.gz *
 
-releases/$(CRICNIRELEASE).tar.gz: install-cri-deps
+releases/$(CRICNIRELEASE).tar.gz: install-cri-deps $(CRIDIR)/cri-containerd.DEPRECATED.txt
 	@echo "$(WHALE) $@"
 	@cd $(CRIDIR) && tar -czf ../../releases/$(CRICNIRELEASE).tar.gz *
 else
-releases/$(CRIRELEASE).tar.gz: install-cri-deps
+releases/$(CRIRELEASE).tar.gz: install-cri-deps $(CRIDIR)/cri-containerd.DEPRECATED.txt
 	@echo "$(WHALE) $@"
-	@tar -czf releases/$(CRIRELEASE).tar.gz -C $(CRIDIR) etc/crictl.yaml etc/systemd usr opt/containerd
+	@tar -czf releases/$(CRIRELEASE).tar.gz -C $(CRIDIR) cri-containerd.DEPRECATED.txt etc/crictl.yaml etc/systemd usr opt/containerd
 
-releases/$(CRICNIRELEASE).tar.gz: install-cri-deps
+releases/$(CRICNIRELEASE).tar.gz: install-cri-deps $(CRIDIR)/cri-containerd.DEPRECATED.txt
 	@echo "$(WHALE) $@"
-	@tar -czf releases/$(CRICNIRELEASE).tar.gz -C $(CRIDIR) etc usr opt
+	@tar -czf releases/$(CRICNIRELEASE).tar.gz -C $(CRIDIR) cri-containerd.DEPRECATED.txt etc usr opt
 endif
 
 cri-release: releases/$(CRIRELEASE).tar.gz
@@ -369,6 +388,8 @@ clean-test: ## clean up debris from previously failed tests
 	@rm -rf /run/containerd/fifo/*
 	@rm -rf /run/containerd-test/*
 	@rm -rf bin/cri-integration.test
+	@rm -rf bin/cni-bridge-fp
+	@rm -rf bin/containerd-shim-runc-fp-v1
 
 install: ## install binaries
 	@echo "$(WHALE) $@ $(BINARIES)"
