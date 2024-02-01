@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 go build -v -o /dev/null
 ADD . .
 RUN CGO_ENABLED=0 go build -v -o /kubernetes-oomkill-exporter
 
-FROM alpine:3.16
+FROM alpine:3.19
 LABEL maintainer="jan.knipper@sap.com"
 LABEL source_repository="https://github.com/sapcc/kubernetes-oomkill-exporter"
 
