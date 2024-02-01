@@ -1,10 +1,9 @@
 module github.com/sapcc/kubernetes-oomkill-exporter
 
-go 1.19
+go 1.21
 
 require (
 	github.com/containerd/containerd v1.6.26
-	github.com/euank/go-kmsg-parser v2.1.0+incompatible
 	github.com/golang/glog v1.1.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
@@ -26,6 +25,7 @@ require (
 	github.com/containerd/typeurl v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
+	github.com/euank/go-kmsg-parser v2.0.0+incompatible // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
 	github.com/gogo/googleapis v1.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
