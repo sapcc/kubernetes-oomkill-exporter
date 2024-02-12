@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: oomkill-exporter
-        image: sapcc/kubernetes-oomkill-exporter:0.5.2
+        image: sapcc/kubernetes-oomkill-exporter:0.5.10
         imagePullPolicy: IfNotPresent
         args:
         - -logtostderr
