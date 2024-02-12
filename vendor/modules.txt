@@ -133,6 +133,8 @@ github.com/docker/go-events
 # github.com/euank/go-kmsg-parser v2.0.0+incompatible
 ## explicit
 github.com/euank/go-kmsg-parser/kmsgparser
+# github.com/euank/go-kmsg-parser/v3 v3.0.0
+## explicit; go 1.18
 # github.com/go-logr/logr v1.3.0
 ## explicit; go 1.18
 github.com/go-logr/logr

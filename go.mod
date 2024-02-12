@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/containerd/containerd v1.6.26
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible
+	github.com/euank/go-kmsg-parser/v3 v3.0.0
 	github.com/golang/glog v1.1.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
