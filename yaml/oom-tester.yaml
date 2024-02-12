@@ -11,6 +11,7 @@ spec:
   template:
     metadata:
       labels:
+        ccloud/support-group: containers
         app: oom-tester
     spec:
       affinity:
@@ -21,10 +22,10 @@ spec:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - <insert node name>
+                - kks-s-qa-de-1-payload-x8hhs
       containers:
        - name: oom-test
-         image: ubuntu
+         image: keppel.eu-de-1.cloud.sap/ccloud-dockerhub-mirror/library/ubuntu
          command:
           - "perl"
           - "-wE"
