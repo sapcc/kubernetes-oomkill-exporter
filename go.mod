@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/containerd/containerd v1.7.16
-	github.com/euank/go-kmsg-parser v2.0.0+incompatible
+	github.com/euank/go-kmsg-parser v2.1.0+incompatible
 	github.com/golang/glog v1.2.1
 	github.com/prometheus/client_golang v1.19.1
 	github.com/stretchr/testify v1.9.0
