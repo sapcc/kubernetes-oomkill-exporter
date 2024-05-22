@@ -1,0 +1,17 @@
+{{- if .Values.PodMonitor.enable }}
+{{ $resourceName := print "oomkill-exporter-" .Values.containerRuntime }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{$resourceName}}
+  labels: {{ toYaml .Values.PodMonitor.labels | nindent 4}}
+spec:
+  namespaceSelector:
+    matchNames: 
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app: {{$resourceName}}
+  podMetricsEndpoints:
+  - port: metrics
+{{- end }}
