@@ -10,9 +10,6 @@ RUN make -C /src install PREFIX=/pkg GOTOOLCHAIN=local GO_BUILDFLAGS='-mod vendo
 
 FROM alpine:3.20
 
-RUN addgroup -g 4200 appgroup \
-  && adduser -h /home/appuser -s /sbin/nologin -G appgroup -D -u 4200 appuser
-
 # upgrade all installed packages to fix potential CVEs in advance
 # also remove apk package manager to hopefully remove dependency on OpenSSL 🤞
 RUN apk upgrade --no-cache --no-progress \
@@ -31,6 +28,5 @@ LABEL source_repository="https://github.com/sapcc/kubernetes-oomkill-exporter" \
   org.opencontainers.image.revision=${BININFO_COMMIT_HASH} \
   org.opencontainers.image.version=${BININFO_VERSION}
 
-USER 4200:4200
-WORKDIR /home/appuser
+WORKDIR /
 ENTRYPOINT [ "/usr/bin/kubernetes-oomkill-exporter" ]

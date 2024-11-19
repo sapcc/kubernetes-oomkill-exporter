@@ -7,6 +7,7 @@ binaries:
     installTo:   bin/
 dockerfile:
   enabled: true
+  runAsRoot: true
 golang:
   setGoModVersion: true
   enableVendoring: true
