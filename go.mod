@@ -9,7 +9,7 @@ require (
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible
 	github.com/euank/go-kmsg-parser/v3 v3.0.0
 	github.com/golang/glog v1.2.3
-	github.com/prometheus/client_golang v1.19.1
+	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.27.0
 	k8s.io/node-problem-detector v0.8.20
@@ -22,7 +22,7 @@ require (
 	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/acobaugh/osrelease v0.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/cgroups v1.1.0 // indirect
 	github.com/containerd/continuity v0.4.2 // indirect
 	github.com/containerd/fifo v1.1.0 // indirect
@@ -43,7 +43,7 @@ require (
 	github.com/google/gofuzz v1.2.1-0.20210504230335-f78f29fc09ea // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/sys/mountinfo v0.6.2 // indirect
