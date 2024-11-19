@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "default:pinDigestsDisabled",
+    "mergeConfidence:all-badges",
+    "docker:disable"
+  ],
+  "assignees": [
+    "jknipper"
+  ],
+  "commitMessageAction": "Renovate: Update",
+  "constraints": {
+    "go": "1.23"
+  },
+  "dependencyDashboardOSVVulnerabilitySummary": "all",
+  "osvVulnerabilityAlerts": true,
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "golang"
+      ],
+      "allowedVersions": "1.23.x"
+    },
+    {
+      "matchPackageNames": [
+        "/^github\\.com\\/sapcc\\/.*/"
+      ],
+      "automerge": true,
+      "groupName": "github.com/sapcc"
+    },
+    {
+      "matchPackageNames": [
+        "!/^github\\.com\\/sapcc\\/.*/",
+        "/.*/"
+      ],
+      "groupName": "External dependencies"
+    },
+    {
+      "matchPackageNames": [
+        "/^k8s.io\\//"
+      ],
+      "allowedVersions": "0.28.x"
+    }
+  ],
+  "prHourlyLimit": 0,
+  "schedule": [
+    "before 8am on Friday"
+  ],
+  "semanticCommits": "disabled"
+}

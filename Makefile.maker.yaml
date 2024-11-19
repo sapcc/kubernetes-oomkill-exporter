@@ -1,0 +1,23 @@
+# Configuration file for <https://github.com/sapcc/go-makefile-maker>
+metadata:
+  url: https://github.com/sapcc/kubernetes-oomkill-exporter
+binaries:
+  - name:        kubernetes-oomkill-exporter
+    fromPackage: .
+    installTo:   bin/
+dockerfile:
+  enabled: true
+golang:
+  setGoModVersion: true
+  enableVendoring: true
+golangciLint:
+  createConfig: true
+githubWorkflow:
+  ci:
+    enabled: true
+  global:
+    defaultBranch: master
+renovate:
+  enabled: true
+  assignees:
+    - jknipper

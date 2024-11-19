@@ -1,2 +1,3 @@
 /kubernetes-oomkill-exporter
 /*.log
+/build
