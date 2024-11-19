@@ -147,6 +147,10 @@ func (l *Local) Server(ctx context.Context, _ *ptypes.Empty, _ ...grpc.CallOptio
 	}, nil
 }
 
+func (l *Local) PluginInfo(ctx context.Context, in *api.PluginInfoRequest, opts ...grpc.CallOption) (*api.PluginInfoResponse, error) {
+	return nil, errdefs.ErrNotImplemented
+}
+
 func (l *Local) getUUID() (string, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -157,6 +161,9 @@ func (l *Local) getUUID() (string, error) {
 			return l.generateUUID()
 		}
 		return "", err
+	}
+	if len(data) == 0 {
+		return l.generateUUID()
 	}
 	u := string(data)
 	if _, err := uuid.Parse(u); err != nil {
