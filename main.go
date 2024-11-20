@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/namespaces"
@@ -65,8 +66,14 @@ func main() {
 
 	go func() {
 		glog.Info("Starting prometheus metrics")
-		http.Handle("/metrics", promhttp.Handler()) //nolint:all
-		glog.Warning(http.ListenAndServe(metricsAddr, nil)) //nolint:all
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+		server := &http.Server{
+			Addr:              metricsAddr,
+			ReadHeaderTimeout: 3 * time.Second,
+			Handler:           mux,
+		}
+		glog.Warning(server.ListenAndServe())
 	}()
 
 	kmsgWatcher := kmsg.NewKmsgWatcher(types.WatcherConfig{Plugin: "kmsg"})
