@@ -54,7 +54,7 @@ func main() {
 
 	var labels []string
 	for _, label := range prometheusContainerLabels {
-		labels = append(labels, strings.Replace(label, ".", "_", -1))
+		labels = append(labels, strings.ReplaceAll(label, ".", "_"))
 	}
 	kubernetesCounterVec = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "klog_pod_oomkill",
@@ -65,8 +65,8 @@ func main() {
 
 	go func() {
 		glog.Info("Starting prometheus metrics")
-		http.Handle("/metrics", promhttp.Handler())
-		glog.Warning(http.ListenAndServe(metricsAddr, nil))
+		http.Handle("/metrics", promhttp.Handler()) //permit
+		glog.Warning(http.ListenAndServe(metricsAddr, nil)) //permit
 	}()
 
 	kmsgWatcher := kmsg.NewKmsgWatcher(types.WatcherConfig{Plugin: "kmsg"})
@@ -89,12 +89,16 @@ func main() {
 	}
 }
 
-func getContainerIDFromLog(log string) (string, string) {
+func getContainerIDFromLog(log string) (podUID, containerID string) {
+	podUID = ""
+	containerID = ""
+
 	if matches := kmesgRE.FindStringSubmatch(log); matches != nil {
-		return matches[1], matches[2]
+		podUID = matches[1]
+		containerID = matches[2]
 	}
 
-	return "", ""
+	return
 }
 
 func getContainerLabels(containerID string, cli *containerd.Client) (map[string]string, error) {
@@ -111,8 +115,7 @@ func prometheusCount(containerLabels map[string]string) {
 	var counter prometheus.Counter
 	var err error
 
-	var labels map[string]string
-	labels = make(map[string]string)
+	labels := make(map[string]string)
 	for key, label := range prometheusContainerLabels {
 		labels[label] = containerLabels[key]
 	}
