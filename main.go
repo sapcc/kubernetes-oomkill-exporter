@@ -65,8 +65,8 @@ func main() {
 
 	go func() {
 		glog.Info("Starting prometheus metrics")
-		http.Handle("/metrics", promhttp.Handler()) //permit
-		glog.Warning(http.ListenAndServe(metricsAddr, nil)) //permit
+		http.Handle("/metrics", promhttp.Handler()) //nolint:all
+		glog.Warning(http.ListenAndServe(metricsAddr, nil)) //nolint:all
 	}()
 
 	kmsgWatcher := kmsg.NewKmsgWatcher(types.WatcherConfig{Plugin: "kmsg"})
