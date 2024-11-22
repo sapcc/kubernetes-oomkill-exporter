@@ -5,8 +5,8 @@ go 1.23
 toolchain go1.23.3
 
 require (
-	github.com/containerd/containerd v1.7.16
-	github.com/euank/go-kmsg-parser v2.0.0+incompatible
+	github.com/containerd/containerd/v2 v2.0.0
+	github.com/euank/go-kmsg-parser/v3 v3.0.0
 	github.com/golang/glog v1.2.3
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.9.0
