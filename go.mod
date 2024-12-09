@@ -2,8 +2,6 @@ module github.com/sapcc/kubernetes-oomkill-exporter
 
 go 1.23
 
-toolchain go1.23.3
-
 require (
 	github.com/containerd/containerd v1.7.24
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible
