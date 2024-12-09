@@ -3,6 +3,9 @@
 # Edit Makefile.maker.yaml instead.                                            #
 ################################################################################
 
+# Copyright 2024 SAP SE
+# SPDX-License-Identifier: Apache-2.0
+
 name: Checks
 "on":
   push:
@@ -26,15 +29,17 @@ jobs:
         uses: actions/setup-go@v5
         with:
           check-latest: true
-          go-version: 1.23.1
+          go-version: 1.23.4
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
       - name: Dependency Licenses Review
         run: make check-dependency-licenses
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
       - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
+        run: govulncheck -format text ./...
       - name: Check for spelling errors
         uses: reviewdog/action-misspell@v1
         with:

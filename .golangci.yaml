@@ -3,6 +3,9 @@
 # Edit Makefile.maker.yaml instead.                                            #
 ################################################################################
 
+# Copyright 2024 SAP SE
+# SPDX-License-Identifier: Apache-2.0
+
 run:
   timeout: 3m # 1m by default
   modules-download-mode: vendor
@@ -32,8 +35,10 @@ linters-settings:
   errcheck:
     # Report about assignment of errors to blank identifier.
     check-blank: true
-    # Report about not checking of errors in type assertions.
-    check-type-assertions: true
+    # Do not report about not checking of errors in type assertions.
+    # This is not as dangerous as skipping error values because an unchecked type assertion just immediately panics.
+    # We disable this because it makes a ton of useless noise esp. in test code.
+    check-type-assertions: false
   forbidigo:
     analyze-types: true # required for pkg:
     forbid:

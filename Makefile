@@ -3,6 +3,9 @@
 # Edit Makefile.maker.yaml instead.                                            #
 ################################################################################
 
+# Copyright 2024 SAP SE
+# SPDX-License-Identifier: Apache-2.0
+
 MAKEFLAGS=--warn-undefined-variables
 # /bin/sh is dash on Debian which does not support all features of ash/bash
 # to fix that we use /bin/bash only on Debian to not break Alpine
@@ -14,10 +17,16 @@ endif
 
 default: build-all
 
-prepare-static-check: FORCE
+install-golangci-lint: FORCE
 	@if ! hash golangci-lint 2>/dev/null; then printf "\e[1;36m>> Installing golangci-lint (this may take a while)...\e[0m\n"; go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; fi
+
+install-go-licence-detector: FORCE
 	@if ! hash go-licence-detector 2>/dev/null; then printf "\e[1;36m>> Installing go-licence-detector...\e[0m\n"; go install go.elastic.co/go-licence-detector@latest; fi
+
+install-addlicense: FORCE
 	@if ! hash addlicense 2>/dev/null; then  printf "\e[1;36m>> Installing addlicense...\e[0m\n";  go install github.com/google/addlicense@latest; fi
+
+prepare-static-check: FORCE install-golangci-lint install-go-licence-detector install-addlicense
 
 GO_BUILDFLAGS = -mod vendor
 GO_LDFLAGS =
@@ -55,7 +64,7 @@ comma := ,
 check: FORCE static-check build/cover.html build-all
 	@printf "\e[1;32m>> All checks successful.\e[0m\n"
 
-run-golangci-lint: FORCE prepare-static-check
+run-golangci-lint: FORCE install-golangci-lint
 	@printf "\e[1;36m>> golangci-lint\e[0m\n"
 	@golangci-lint run
 
@@ -82,15 +91,19 @@ vendor-compat: FORCE
 	go mod vendor
 	go mod verify
 
-license-headers: FORCE prepare-static-check
+force-license-headers: FORCE install-addlicense
 	@printf "\e[1;36m>> addlicense\e[0m\n"
-	@addlicense -c "SAP SE" -- $(patsubst $(shell awk '$$1 == "module" {print $$2}' go.mod)%,.%/*.go,$(shell go list ./...))
+	echo -n $(patsubst $(shell awk '$$1 == "module" {print $$2}' go.mod)%,.%/*.go,$(shell go list ./...)) | xargs -d" " -I{} bash -c 'year="$$(rg -P "Copyright (....) SAP SE" -Nor "\$$1" {})"; awk -i inplace '"'"'{if (display) {print} else {!/^\/\*/ && !/^\*/ && !/^\$$/}}; /^package /{print;display=1}'"'"' {}; addlicense -c "SAP SE" -s=only -y "$$year" -- {}'
 
-check-license-headers: FORCE prepare-static-check
+license-headers: FORCE install-addlicense
+	@printf "\e[1;36m>> addlicense\e[0m\n"
+	@addlicense -c "SAP SE" -s=only -- $(patsubst $(shell awk '$$1 == "module" {print $$2}' go.mod)%,.%/*.go,$(shell go list ./...))
+
+check-license-headers: FORCE install-addlicense
 	@printf "\e[1;36m>> addlicense --check\e[0m\n"
 	@addlicense --check -- $(patsubst $(shell awk '$$1 == "module" {print $$2}' go.mod)%,.%/*.go,$(shell go list ./...))
 
-check-dependency-licenses: FORCE prepare-static-check
+check-dependency-licenses: FORCE install-go-licence-detector
 	@printf "\e[1;36m>> go-licence-detector\e[0m\n"
 	@go list -m -mod=readonly -json all | go-licence-detector -includeIndirect -rules .license-scan-rules.json -overrides .license-scan-overrides.jsonl
 
@@ -116,6 +129,9 @@ help: FORCE
 	@printf "  \e[36mhelp\e[0m                               Display this help.\n"
 	@printf "\n"
 	@printf "\e[1mPrepare\e[0m\n"
+	@printf "  \e[36minstall-golangci-lint\e[0m              Install golangci-lint required by run-golangci-lint/static-check\n"
+	@printf "  \e[36minstall-go-licence-detector\e[0m        Install-go-licence-detector required by check-dependency-licenses/static-check\n"
+	@printf "  \e[36minstall-addlicense\e[0m                 Install addlicense required by check-license-headers/license-headers/static-check\n"
 	@printf "  \e[36mprepare-static-check\e[0m               Install any tools required by static-check. This is used in CI before dropping privileges, you should probably install all the tools using your package manager\n"
 	@printf "\n"
 	@printf "\e[1mBuild\e[0m\n"
@@ -133,6 +149,7 @@ help: FORCE
 	@printf "\e[1mDevelopment\e[0m\n"
 	@printf "  \e[36mvendor\e[0m                             Run go mod tidy, go mod verify, and go mod vendor.\n"
 	@printf "  \e[36mvendor-compat\e[0m                      Same as 'make vendor' but go mod tidy will use '-compat' flag with the Go version from go.mod file as value.\n"
+	@printf "  \e[36mforce-license-headers\e[0m              Remove and re-add all license headers to all non-vendored source code files.\n"
 	@printf "  \e[36mlicense-headers\e[0m                    Add license headers to all non-vendored source code files.\n"
 	@printf "  \e[36mcheck-license-headers\e[0m              Check license headers in all non-vendored .go files.\n"
 	@printf "  \e[36mcheck-dependency-licenses\e[0m          Check all dependency licenses using go-licence-detector.\n"
