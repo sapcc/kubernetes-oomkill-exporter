@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/euank/go-kmsg-parser/kmsgparser"
+	"github.com/euank/go-kmsg-parser/v2/kmsgparser"
 	"github.com/stretchr/testify/require"
 )
 

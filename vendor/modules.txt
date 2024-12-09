@@ -176,6 +176,9 @@ github.com/docker/go-events
 # github.com/euank/go-kmsg-parser v2.0.0+incompatible
 ## explicit
 github.com/euank/go-kmsg-parser/kmsgparser
+# github.com/euank/go-kmsg-parser/v2 v2.1.0
+## explicit; go 1.14
+github.com/euank/go-kmsg-parser/v2/kmsgparser
 # github.com/felixge/httpsnoop v1.0.4
 ## explicit; go 1.13
 github.com/felixge/httpsnoop
