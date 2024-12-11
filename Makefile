@@ -29,7 +29,7 @@ install-addlicense: FORCE
 prepare-static-check: FORCE install-golangci-lint install-go-licence-detector install-addlicense
 
 GO_BUILDFLAGS = -mod vendor
-GO_LDFLAGS =
+GO_LDFLAGS = -X main.Version=$(shell git describe --tags --abbrev=0)
 GO_TESTENV =
 GO_BUILDENV =
 
