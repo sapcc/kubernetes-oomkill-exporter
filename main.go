@@ -16,7 +16,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -32,11 +34,8 @@ import (
 )
 
 var (
-	defaultPattern = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:cri-containerd-)?([a-f0-9]+)`
-	kmesgRE        = regexp.MustCompile(defaultPattern)
-)
-
-var (
+	defaultPattern            = `^oom-kill.+,task_memcg=\/kubepods(?:\.slice)?\/.+\/(?:kubepods-burstable-)?pod(\w+[-_]\w+[-_]\w+[-_]\w+[-_]\w+)(?:\.slice)?\/(?:cri-containerd-)?([a-f0-9]+)`
+	kmesgRE                   = regexp.MustCompile(defaultPattern)
 	kubernetesCounterVec      *prometheus.CounterVec
 	prometheusContainerLabels = map[string]string{
 		"io.kubernetes.container.name": "container_name",
@@ -45,6 +44,8 @@ var (
 		"io.kubernetes.pod.name":       "pod_name",
 	}
 	metricsAddr string
+	versionFlag bool
+	Version     = "dev" // set on compile time
 )
 
 func init() {
@@ -52,6 +53,13 @@ func init() {
 
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
 	flag.StringVar(&newPattern, "regexp-pattern", defaultPattern, "Overwrites the default regexp pattern to match and extract Pod UID and Container ID.")
+	flag.BoolVar(&versionFlag, "version", false, "Print version info")
+	flag.Parse()
+
+	if versionFlag {
+		fmt.Printf("Version: %s\n", Version)
+		os.Exit(0)
+	}
 
 	if newPattern != "" {
 		kmesgRE = regexp.MustCompile(newPattern)
@@ -59,8 +67,6 @@ func init() {
 }
 
 func main() {
-	flag.Parse()
-
 	containerdClient, err := containerd.New("/run/containerd/containerd.sock")
 	if err != nil {
 		glog.Fatal(err)
