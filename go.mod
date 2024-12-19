@@ -1,6 +1,8 @@
 module github.com/sapcc/kubernetes-oomkill-exporter
 
-go 1.23
+go 1.23.1
+
+toolchain go1.23.4
 
 require (
 	github.com/containerd/containerd v1.7.24
@@ -8,7 +10,7 @@ require (
 	github.com/golang/glog v1.2.3
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.33.0
 	k8s.io/node-problem-detector v0.8.20
 )
 
