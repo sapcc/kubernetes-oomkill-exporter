@@ -1,6 +1,6 @@
 module github.com/sapcc/kubernetes-oomkill-exporter
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/containerd/containerd v1.7.24
@@ -8,7 +8,7 @@ require (
 	github.com/golang/glog v1.2.3
 	github.com/prometheus/client_golang v1.20.5
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.34.0
 	k8s.io/node-problem-detector v0.8.20
 )
 
@@ -80,7 +80,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
 	go.opentelemetry.io/otel/trace v1.32.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
