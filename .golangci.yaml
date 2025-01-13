@@ -89,6 +89,9 @@ linters-settings:
     local-prefixes: github.com/sapcc/kubernetes-oomkill-exporter
   gomoddirectives:
     go-version-pattern: '1\.\d+(\.0)?$'
+    replace-allow-list:
+      # for go-pmtud
+      - github.com/mdlayher/arp
     toolchain-forbidden: true
   gosec:
     excludes:
