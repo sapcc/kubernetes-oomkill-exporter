@@ -36,7 +36,7 @@ GO_BUILDENV =
 build-all: build/kubernetes-oomkill-exporter
 
 build/kubernetes-oomkill-exporter: FORCE
-	@env $(GO_BUILDENV) go build $(GO_BUILDFLAGS) -ldflags '-s -w $(GO_LDFLAGS)' -o build/kubernetes-oomkill-exporter .
+	env $(GO_BUILDENV) go build $(GO_BUILDFLAGS) -ldflags '-s -w $(GO_LDFLAGS)' -o build/kubernetes-oomkill-exporter .
 
 DESTDIR =
 ifeq ($(shell uname -s),Darwin)
