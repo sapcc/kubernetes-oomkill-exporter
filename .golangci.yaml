@@ -107,6 +107,7 @@ linters-settings:
     require-specific: true
   stylecheck:
     dot-import-whitelist:
+      - github.com/majewsky/gg/option
       - github.com/onsi/ginkgo/v2
       - github.com/onsi/gomega
   usestdlibvars:
@@ -121,7 +122,6 @@ linters-settings:
     time-weekday: true
     tls-signature-scheme: true
   usetesting:
-    os-setenv: true
     os-temp-dir: true
   whitespace:
     # Enforce newlines (or comments) after multi-line function signatures.
@@ -166,7 +166,6 @@ linters:
     - sqlclosecheck
     - staticcheck
     - stylecheck
-    - tenv
     - typecheck
     - unconvert
     - unparam
