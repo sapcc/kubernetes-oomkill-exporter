@@ -11,8 +11,6 @@ dockerfile:
 golang:
   setGoModVersion: true
   enableVendoring: true
-variables:
-  GO_LDFLAGS: "-X main.Version=$(shell git describe --tags --abbrev=0)"
 golangciLint:
   createConfig: true
 githubWorkflow:
