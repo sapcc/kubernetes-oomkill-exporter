@@ -28,6 +28,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/sapcc/go-api-declarations/bininfo"
 	"golang.org/x/net/context"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/kmsg"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/types"
@@ -45,7 +46,6 @@ var (
 	}
 	metricsAddr string
 	versionFlag bool
-	Version     = "dev" // set on compile time
 )
 
 func init() {
@@ -57,7 +57,7 @@ func init() {
 	flag.Parse()
 
 	if versionFlag {
-		fmt.Printf("Version: %s\n", Version)
+		fmt.Printf("Version: %s\n", bininfo.Version())
 		os.Exit(0)
 	}
 

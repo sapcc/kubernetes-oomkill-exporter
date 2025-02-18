@@ -87,6 +87,12 @@ linters-settings:
   goimports:
     # Put local imports after 3rd-party packages.
     local-prefixes: github.com/sapcc/kubernetes-oomkill-exporter
+  gomoddirectives:
+    go-version-pattern: '1\.\d+(\.0)?$'
+    replace-allow-list:
+      # for go-pmtud
+      - github.com/mdlayher/arp
+    toolchain-forbidden: true
   gosec:
     excludes:
       # gosec wants us to set a short ReadHeaderTimeout to avoid Slowloris attacks, but doing so would expose us to Keep-Alive race conditions (see https://iximiuz.com/en/posts/reverse-proxy-http-keep-alive-and-502s/)
@@ -101,6 +107,7 @@ linters-settings:
     require-specific: true
   stylecheck:
     dot-import-whitelist:
+      - github.com/majewsky/gg/option
       - github.com/onsi/ginkgo/v2
       - github.com/onsi/gomega
   usestdlibvars:
@@ -114,6 +121,8 @@ linters-settings:
     time-month: true
     time-weekday: true
     tls-signature-scheme: true
+  usetesting:
+    os-temp-dir: true
   whitespace:
     # Enforce newlines (or comments) after multi-line function signatures.
     multi-func: true
@@ -132,6 +141,7 @@ linters:
     - errcheck
     - errname
     - errorlint
+    - exptostd
     - forbidigo
     - ginkgolinter
     - gocheckcompilerdirectives
@@ -139,6 +149,7 @@ linters:
     - gocritic
     - gofmt
     - goimports
+    - gomoddirectives
     - gosec
     - gosimple
     - govet
@@ -155,10 +166,10 @@ linters:
     - sqlclosecheck
     - staticcheck
     - stylecheck
-    - tenv
     - typecheck
     - unconvert
     - unparam
     - unused
     - usestdlibvars
+    - usetesting
     - whitespace
