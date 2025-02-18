@@ -46,14 +46,16 @@ var (
 	}
 	metricsAddr string
 	versionFlag bool
+	newPattern  string
 )
 
 func init() {
-	var newPattern string
-
 	flag.StringVar(&metricsAddr, "listen-address", ":9102", "The address to listen on for HTTP requests.")
 	flag.StringVar(&newPattern, "regexp-pattern", defaultPattern, "Overwrites the default regexp pattern to match and extract Pod UID and Container ID.")
 	flag.BoolVar(&versionFlag, "version", false, "Print version info")
+}
+
+func main() {
 	flag.Parse()
 
 	if versionFlag {
@@ -64,9 +66,7 @@ func init() {
 	if newPattern != "" {
 		kmesgRE = regexp.MustCompile(newPattern)
 	}
-}
 
-func main() {
 	containerdClient, err := containerd.New("/run/containerd/containerd.sock")
 	if err != nil {
 		glog.Fatal(err)
