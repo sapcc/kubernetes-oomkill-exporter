@@ -6,7 +6,7 @@ require (
 	github.com/containerd/containerd v1.7.25
 	github.com/euank/go-kmsg-parser/v2 v2.1.0
 	github.com/golang/glog v1.2.4
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.21.0
 	github.com/sapcc/go-api-declarations v1.14.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.35.0
@@ -65,7 +65,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
@@ -86,7 +86,7 @@ require (
 	google.golang.org/genproto v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/grpc v1.68.1 // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
