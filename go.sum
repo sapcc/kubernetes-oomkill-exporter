@@ -161,8 +161,8 @@ github.com/prometheus/procfs v0.15.1 h1:YagwOFzUgYfKKHX6Dr+sHT7km/hxC76UB0leargg
 github.com/prometheus/procfs v0.15.1/go.mod h1:fB45yRUv8NstnjriLhBQLuOUt+WW4BsoGhij/e3PBqk=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
-github.com/sapcc/go-api-declarations v1.13.2 h1:dPYYsjwKGObSAm6+K+dYCiLQWunYuWkywlZnuXfjsmk=
-github.com/sapcc/go-api-declarations v1.13.2/go.mod h1:83R3hTANhuRXt/pXDby37IJetw8l7DG41s33Tp9NXxI=
+github.com/sapcc/go-api-declarations v1.14.0 h1:L6PrfbAcbjg4fnlkuCzKrbCSAQMaMr2H1TiVLu7hZYU=
+github.com/sapcc/go-api-declarations v1.14.0/go.mod h1:KEYQoknn0gSjhmI19b85YUEZkav9SOu2bC21VeDNlnU=
 github.com/shirou/gopsutil/v3 v3.24.5 h1:i0t8kL+kQTvpAYToeuiVk3TgDeKOFioZO3Ztz/iZ9pI=
 github.com/shirou/gopsutil/v3 v3.24.5/go.mod h1:bsoOS1aStSs9ErQ1WWfxllSeS1K5D+U30r2NfcubMVk=
 github.com/shoenig/go-m1cpu v0.1.6 h1:nxdKQNcEB6vzgA2E2bvzKIYRuNj7XNJ4S/aRSwKzFtM=
