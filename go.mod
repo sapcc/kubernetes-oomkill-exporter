@@ -7,7 +7,7 @@ require (
 	github.com/euank/go-kmsg-parser/v2 v2.1.0
 	github.com/golang/glog v1.2.4
 	github.com/prometheus/client_golang v1.21.1
-	github.com/sapcc/go-api-declarations v1.14.1
+	github.com/sapcc/go-api-declarations v1.14.2
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.37.0
 	k8s.io/node-problem-detector v0.8.20
