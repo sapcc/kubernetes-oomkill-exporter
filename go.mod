@@ -3,8 +3,8 @@ module github.com/sapcc/kubernetes-oomkill-exporter
 go 1.24
 
 require (
-	github.com/containerd/containerd v1.7.27
-	github.com/euank/go-kmsg-parser/v2 v2.1.0
+	github.com/containerd/containerd/v2 v2.0.5
+	github.com/euank/go-kmsg-parser/v3 v3.0.0
 	github.com/golang/glog v1.2.4
 	github.com/prometheus/client_golang v1.22.0
 	github.com/sapcc/go-api-declarations v1.14.3
