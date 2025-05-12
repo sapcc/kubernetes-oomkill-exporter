@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+archives:
+  - name_template: '{{ .ProjectName }}-{{ replace .Version "v" "" }}-{{ .Os }}-{{ .Arch }}'
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - CHANGELOG.md
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+
+builds:
+  - binary: 'kubernetes-oomkill-exporter'
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/sapcc/go-api-declarations/bininfo.binName=kubernetes-oomkill-exporter
+      - -X github.com/sapcc/go-api-declarations/bininfo.version={{ .Version }}
+      - -X github.com/sapcc/go-api-declarations/bininfo.commit={{ .FullCommit  }}
+      - -X github.com/sapcc/go-api-declarations/bininfo.buildDate={{ .CommitDate }} # use CommitDate instead of Date for reproducibility
+    main: .
+    # Set the modified timestamp on the output binary to ensure that builds are reproducible.
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+release:
+  make_latest: true
+  prerelease: auto
+
+snapshot:
+  version_template: "{{ .Tag }}-next"
