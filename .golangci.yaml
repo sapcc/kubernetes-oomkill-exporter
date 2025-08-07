@@ -71,6 +71,9 @@ linters:
     - usetesting
     - whitespace
   settings:
+    dupword:
+      # Do not choke on SQL statements like `INSERT INTO things (foo, bar, baz) VALUES (TRUE, TRUE, TRUE)`.
+      ignore: [ "TRUE", "FALSE", "NULL" ]
     errcheck:
       check-type-assertions: false
       # Report about assignment of errors to blank identifier.
