@@ -12,6 +12,7 @@ mkShell {
     go_1_24
     golangci-lint
     gotools # goimports
+    reuse
     # keep this line if you use bash
     bashInteractive
   ];
