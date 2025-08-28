@@ -35,6 +35,24 @@ jobs:
           go-version: 1.24.6
       - name: Build all binaries
         run: make build-all
+  code_coverage:
+    name: Code coverage report
+    if: github.event_name == 'pull_request'
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+      - name: Post coverage report
+        uses: fgrosse/go-coverage-report@v1.2.0
+        with:
+          coverage-artifact-name: code-coverage
+          coverage-file-name: cover.out
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
   test:
     name: Test
     needs:
@@ -50,3 +68,8 @@ jobs:
           go-version: 1.24.6
       - name: Run tests and generate coverage report
         run: make build/cover.out
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: build/cover.out
