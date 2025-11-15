@@ -3,13 +3,13 @@ module github.com/sapcc/kubernetes-oomkill-exporter
 go 1.25
 
 require (
-	github.com/containerd/containerd v1.7.27
+	github.com/containerd/containerd v1.7.29
 	github.com/euank/go-kmsg-parser/v2 v2.1.0
 	github.com/golang/glog v1.2.5
 	github.com/prometheus/client_golang v1.22.0
 	github.com/sapcc/go-api-declarations v1.15.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.40.0
+	golang.org/x/net v0.42.0
 	k8s.io/node-problem-detector v0.8.20
 )
 
@@ -80,9 +80,9 @@ require (
 	go.opentelemetry.io/otel v1.32.0 // indirect
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
 	go.opentelemetry.io/otel/trace v1.32.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/genproto v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
 	google.golang.org/grpc v1.68.1 // indirect
