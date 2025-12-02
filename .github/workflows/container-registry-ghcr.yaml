@@ -54,18 +54,3 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-  cleanup-untagged-versions:
-    name: Cleanup untagged GHCR versions
-    needs:
-      - build-and-push-image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-      - name: Cleanup untagged GHCR versions
-        uses: actions/delete-package-versions@v5
-        with:
-          delete-only-untagged-versions: "true"
-          min-versions-to-keep: "0"
-          package-name: ${{ github.event.repository.name }}
-          package-type: container
