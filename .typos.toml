@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2025 SAP SE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[default.extend-words]
+
+[files]
+extend-exclude = [
+  "go.mod",
+  "vendor/",
+]
