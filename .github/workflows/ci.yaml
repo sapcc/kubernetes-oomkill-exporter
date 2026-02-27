@@ -69,7 +69,7 @@ jobs:
       - name: Run tests and generate coverage report
         run: make build/cover.out
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: code-coverage
           path: build/cover.out
