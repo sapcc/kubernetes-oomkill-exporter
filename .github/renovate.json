@@ -4,8 +4,7 @@
     "config:recommended",
     "default:pinDigestsDisabled",
     "mergeConfidence:all-badges",
-    "docker:disable",
-    "github-actions:disable"
+    "docker:disable"
   ],
   "assignees": [
     "jknipper"
@@ -58,6 +57,18 @@
         "major"
       ],
       "dependencyDashboardApproval": true
+    },
+    {
+      "matchDepTypes": [
+        "action"
+      ],
+      "matchFileNames": [
+        ".github/workflows/checks.yaml",
+        ".github/workflows/ci.yaml",
+        ".github/workflows/codeql.yaml",
+        ".github/workflows/container-registry-ghcr.yaml"
+      ],
+      "enabled": false
     },
     {
       "matchPackageNames": [
