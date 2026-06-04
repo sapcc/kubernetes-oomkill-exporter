@@ -59,9 +59,6 @@
       "dependencyDashboardApproval": true
     },
     {
-      "matchDepTypes": [
-        "action"
-      ],
       "matchFileNames": [
         ".github/workflows/checks.yaml",
         ".github/workflows/ci.yaml",
