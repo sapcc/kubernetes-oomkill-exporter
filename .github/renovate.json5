@@ -68,12 +68,6 @@
         ".github/workflows/container-registry-ghcr.yaml"
       ],
       "enabled": false
-    },
-    {
-      "matchPackageNames": [
-        "/^k8s.io\\//"
-      ],
-      "allowedVersions": "0.33.x"
     }
   ],
   "prHourlyLimit": 0,
