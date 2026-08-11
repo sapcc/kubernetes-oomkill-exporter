@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -29,7 +30,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sapcc/go-api-declarations/bininfo"
-	"context"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/kmsg"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/types"
 )
