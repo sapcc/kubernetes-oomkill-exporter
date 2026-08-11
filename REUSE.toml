@@ -647,6 +647,14 @@ SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
 path = [
+  "vendor/go.opentelemetry.io/auto/**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Other"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
   "vendor/go.opentelemetry.io/otel/**",
 ]
 precedence = "override"
