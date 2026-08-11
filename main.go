@@ -29,7 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sapcc/go-api-declarations/bininfo"
-	"golang.org/x/net/context"
+	"context"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/kmsg"
 	"k8s.io/node-problem-detector/pkg/systemlogmonitor/logwatchers/types"
 )
@@ -129,8 +129,7 @@ func getContainerIDFromLog(log string) (podUID, containerID string) {
 }
 
 func getContainerLabels(containerID string, cli *containerd.Client) (map[string]string, error) {
-	ctx := namespaces.WithNamespace(context.Background(), "k8s.io")
-	container, err := cli.ContainerService().Get(ctx, containerID)
+	container, err := cli.ContainerService().Get(namespaces.WithNamespace(context.Background(), "k8s.io"), containerID)
 	if err != nil {
 		return nil, err
 	}
