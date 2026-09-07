@@ -30,6 +30,11 @@ import (
 	"k8s.io/node-problem-detector/pkg/util/tomb"
 )
 
+const (
+	// retryDelay is the time to wait before attempting to restart the kmsg parser.
+	retryDelay = 5 * time.Second
+)
+
 type kernelLogWatcher struct {
 	cfg       types.WatcherConfig
 	startTime time.Time
@@ -37,6 +42,10 @@ type kernelLogWatcher struct {
 	tomb      *tomb.Tomb
 
 	kmsgParser kmsgparser.Parser
+	// newParser creates a kmsgparser. Overridable in tests; defaults to kmsgparser.NewParser.
+	newParser func() (kmsgparser.Parser, error)
+	// lastRestart is when the parser was last restarted; used to rate-limit restarts.
+	lastRestart time.Time
 }
 
 // NewKmsgWatcher creates a watcher which will read messages from /dev/kmsg
@@ -55,7 +64,8 @@ func NewKmsgWatcher(cfg types.WatcherConfig) types.LogWatcher {
 		startTime: startTime,
 		tomb:      tomb.NewTomb(),
 		// Arbitrary capacity
-		logCh: make(chan *logtypes.Log, 100),
+		logCh:     make(chan *logtypes.Log, 100),
+		newParser: kmsgparser.NewParser,
 	}
 }
 
@@ -64,7 +74,7 @@ var _ types.WatcherCreateFunc = NewKmsgWatcher
 func (k *kernelLogWatcher) Watch() (<-chan *logtypes.Log, error) {
 	if k.kmsgParser == nil {
 		// nil-check to make mocking easier
-		parser, err := kmsgparser.NewParser()
+		parser, err := k.newParser()
 		if err != nil {
 			return nil, fmt.Errorf("failed to create kmsg parser: %v", err)
 		}
@@ -75,9 +85,8 @@ func (k *kernelLogWatcher) Watch() (<-chan *logtypes.Log, error) {
 	return k.logCh, nil
 }
 
-// Stop closes the kmsgparser
+// Stop signals the watch loop to stop.
 func (k *kernelLogWatcher) Stop() {
-	k.kmsgParser.Close()
 	k.tomb.Stop()
 }
 
@@ -85,8 +94,11 @@ func (k *kernelLogWatcher) Stop() {
 func (k *kernelLogWatcher) watchLoop() {
 	kmsgs := k.kmsgParser.Parse()
 	defer func() {
-		if err := k.kmsgParser.Close(); err != nil {
-			klog.Errorf("Failed to close kmsg parser: %v", err)
+		// kmsgParser is nil when stopping interrupted a restart.
+		if k.kmsgParser != nil {
+			if err := k.kmsgParser.Close(); err != nil {
+				klog.Errorf("Failed to close kmsg parser: %v", err)
+			}
 		}
 		close(k.logCh)
 		k.tomb.Done()
@@ -99,8 +111,23 @@ func (k *kernelLogWatcher) watchLoop() {
 			return
 		case msg, ok := <-kmsgs:
 			if !ok {
-				klog.Error("Kmsg channel closed")
-				return
+				klog.Error("Kmsg channel closed, attempting to restart kmsg parser")
+
+				// Close the old parser and clear the reference so the
+				// deferred cleanup doesn't close it a second time.
+				if err := k.kmsgParser.Close(); err != nil {
+					klog.Errorf("Failed to close kmsg parser: %v", err)
+				}
+				k.kmsgParser = nil
+
+				// Try to restart. retryCreateParser() waits between attempts.
+				var restarted bool
+				kmsgs, restarted = k.retryCreateParser()
+				if !restarted {
+					// Stopping was signaled
+					return
+				}
+				continue
 			}
 			klog.V(5).Infof("got kernel message: %+v", msg)
 			if msg.Message == "" {
@@ -113,10 +140,64 @@ func (k *kernelLogWatcher) watchLoop() {
 				continue
 			}
 
-			k.logCh <- &logtypes.Log{
+			// The consumer stops draining logCh before calling Stop(), so a
+			// plain send on a full channel could block forever and deadlock Stop().
+			select {
+			case k.logCh <- &logtypes.Log{
 				Message:   strings.TrimSpace(msg.Message),
 				Timestamp: msg.Timestamp,
+			}:
+			case <-k.tomb.Stopping():
+				klog.Infof("Stop watching kernel log")
+				return
 			}
+		}
+	}
+}
+
+// retryCreateParser attempts to create a new kmsg parser.
+// It tries immediately first, then waits retryDelay between subsequent failures.
+// The first attempt is also delayed if the previous restart was less than
+// retryDelay ago, so a parser that keeps failing right after a successful
+// restart cannot drive a hot restart loop.
+// On success, it seeks the new parser to the end of the kmsg ring buffer to
+// avoid replaying messages that were already processed before the restart.
+// Any messages written to kmsg between the old parser closing and the new
+// parser being seeked are not delivered; this is preferable to replaying an
+// entire ring buffer the watcher has already processed, especially when the
+// restart was triggered by a kmsg flood.
+// It returns the new message channel and true on success, or nil and false if stopping was signaled.
+func (k *kernelLogWatcher) retryCreateParser() (<-chan kmsgparser.Message, bool) {
+	if since := time.Since(k.lastRestart); since < retryDelay {
+		select {
+		case <-k.tomb.Stopping():
+			klog.Infof("Stop watching kernel log during restart attempt")
+			return nil, false
+		case <-time.After(retryDelay - since):
+		}
+	}
+
+	for {
+		parser, err := k.newParser()
+		if err != nil {
+			klog.Errorf("Failed to create new kmsg parser, retrying in %v: %v", retryDelay, err)
+		} else if seekErr := parser.SeekEnd(); seekErr != nil {
+			klog.Errorf("Failed to seek new kmsg parser to end, retrying in %v: %v", retryDelay, seekErr)
+			if closeErr := parser.Close(); closeErr != nil {
+				klog.Errorf("Failed to close kmsg parser after seek failure: %v", closeErr)
+			}
+		} else {
+			k.kmsgParser = parser
+			k.lastRestart = time.Now()
+			klog.Infof("Successfully restarted kmsg parser")
+			return parser.Parse(), true
+		}
+
+		select {
+		case <-k.tomb.Stopping():
+			klog.Infof("Stop watching kernel log during restart attempt")
+			return nil, false
+		case <-time.After(retryDelay):
 		}
 	}
 }
