@@ -14,7 +14,6 @@ name: Container Registry GHCR
   workflow_dispatch: {}
 permissions:
   contents: read
-  packages: write
 jobs:
   build-and-push-image:
     name: Push container to ghcr.io
@@ -56,3 +55,6 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+    permissions:
+      contents: read
+      packages: write
